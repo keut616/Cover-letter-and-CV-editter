@@ -6,6 +6,7 @@
     <title>AI CV Optimizer Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <!-- Google Fonts: Noto Sans Lao -->
@@ -122,29 +123,36 @@
             
             <!-- Step 1: Import -->
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">1. ນໍາເຂົ້າເອກະສານ (Import)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">1. ນໍາເຂົ້າເອກະສານ ຫຼື ວາງເນື້ອໃນ</label>
                 <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-500 transition-colors cursor-pointer" onclick="document.getElementById('file-upload').click()">
                     <div class="space-y-1 text-center">
                         <i class="fas fa-cloud-upload-alt text-3xl text-gray-400"></i>
                         <div class="flex text-sm text-gray-600 justify-center">
                             <span class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
                                 <span>ອັບໂຫຼດໄຟລ໌</span>
-                                <input id="file-upload" name="file-upload" type="file" class="sr-only" accept=".doc,.docx,.pdf" onchange="handleFileUpload(event)">
+                                <input id="file-upload" name="file-upload" type="file" class="sr-only" accept=".docx,.txt" onchange="handleFileUpload(event)">
                             </span>
                         </div>
-                        <p class="text-xs text-gray-500">DOC, DOCX, PDF ທີ່ຮອງຮັບ</p>
+                        <p class="text-xs text-gray-500">DOCX, TXT (ສຳລັບ PDF ແນະນຳໃຫ້ກັອບປີ້ວາງ)</p>
                     </div>
                 </div>
+                
+                <div class="mt-3">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">ຫຼື ວາງຂໍ້ຄວາມ CV ຂອງທ່ານລົງທີ່ນີ້:</label>
+                    <textarea id="raw-text" rows="5" class="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="ວາງເນື້ອໃນ CV ພາສາອັງກິດຂອງທ່ານລົງທີ່ນີ້..." oninput="checkTextInput()"></textarea>
+                </div>
+                
                 <div id="file-status" class="mt-2 text-sm text-green-600 hidden font-medium">
-                    <i class="fas fa-check-circle"></i> ອັບໂຫຼດ "Keut cv.docx" ສຳເລັດແລ້ວ!
+                </div>
+                <div id="error-status" class="mt-2 text-sm text-red-600 hidden font-medium">
                 </div>
             </div>
 
             <!-- Step 2: Process -->
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">2. ປັບປຸງໄວຍະກອນ & ຈັດໜ້າ</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">2. ປັບປຸງໄວຍະກອນ & ຈັດໜ້າດ້ວຍ AI</label>
                 <button id="btn-process" onclick="processCV()" disabled class="w-full flex justify-center items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
-                    <i class="fas fa-magic"></i> ປັບປຸງ CV ໃຫ້ເປັນມືອາຊີບ
+                    <i class="fas fa-magic"></i> AI ປັບປຸງ CV ໃຫ້ເປັນມືອາຊີບ
                 </button>
             </div>
 
@@ -180,198 +188,133 @@
             <!-- Initial State Message -->
             <div id="initial-message" class="text-center text-gray-500 mt-20">
                 <i class="fas fa-file-alt text-6xl mb-4 text-gray-300"></i>
-                <p class="text-xl">ກະລຸນາອັບໂຫຼດ ແລະ ກົດປຸ່ມປັບປຸງ ເພື່ອເບິ່ງຕົວຢ່າງ CV</p>
+                <p class="text-xl">ອັບໂຫຼດໄຟລ໌/ວາງຂໍ້ຄວາມ ແລ້ວກົດປຸ່ມ AI ປັບປຸງ ເພື່ອເບິ່ງຕົວຢ່າງ CV</p>
             </div>
 
             <!-- The CV Document (Hidden initially) -->
             <div id="cv-document" class="a4-paper hidden">
                 <div id="cv-content">
-                    <!-- CV Header -->
-                    <div class="cv-header text-center">
-                        <div class="cv-name">KEUT SOUMPHONEPACKDY</div>
-                        <div class="text-sm mt-2 text-gray-600">
-                            Thatluang Tai Village, Xaysettha District, Vientiane Capital, Laos<br>
-                            Mobile/WhatsApp: 020 58800221 | Email: keut619@gmail.com
-                        </div>
-                    </div>
-
-                    <!-- Personal Details -->
-                    <div class="section-title">Personal Details</div>
-                    <div class="personal-grid">
-                        <div><strong>Gender:</strong> Male</div>
-                        <div><strong>Marital Status:</strong> Married</div>
-                        <div><strong>Date of Birth:</strong> 29/12/1978</div>
-                        <div><strong>Nationality:</strong> Lao</div>
-                        <div><strong>Place of Birth:</strong> Nongsanokham Village, Sikhottabong District</div>
-                        <div><strong>Ethnicity:</strong> Lowland Lao</div>
-                    </div>
-
-                    <!-- Education / Skills -->
-                    <div class="section-title">Education & Skills</div>
-                    <ul class="cv-list">
-                        <li><strong>2007:</strong> Graduated from Quest College, majoring in Information Technology.</li>
-                        <li><strong>1997:</strong> Graduated from Lao-Soviet Friendship Vocational School, majoring in Mining Survey.</li>
-                        <li><strong>Languages:</strong> Lao (Native Speaker), English (Proficient in speaking, listening, and writing).</li>
-                    </ul>
-
-                    <!-- Work Experience -->
-                    <div class="section-title">Professional Experience</div>
-                    
-                    <div class="mb-4">
-                        <div class="flex justify-between items-baseline">
-                            <span class="job-title">Provincial M&E Officer</span>
-                            <span class="job-date">Dec 2022 – Present</span>
-                        </div>
-                        <div class="job-company">JSI Research and Training Institute (LMNCH Project - DOS Funded) | Savannakhet</div>
-                        <ul class="cv-list">
-                            <li>Conduct routine data collection across the province, ensuring accurate entry into appropriate project databases.</li>
-                            <li>Implement quality control processes for data accuracy, consistency, and completeness to promote evidence-based management.</li>
-                            <li>Coordinate with the provincial technical team to identify informational needs and provide relevant data analysis.</li>
-                            <li>Analyze provincial-level data and translate findings into clear visualizations for stakeholders.</li>
-                            <li>Collaborate with research and MEL advisors to operationalize quantitative, qualitative, and participatory methodologies for special studies.</li>
-                            <li>Support district health offices and catchment facilities in conducting routine Data Quality Audits.</li>
-                            <li>Facilitate capacity-building opportunities for local partners regarding data collection methods.</li>
-                            <li>Supervise data entry assistants, providing guidance on techniques to ensure reliable data management.</li>
-                        </ul>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="flex justify-between items-baseline">
-                            <span class="job-title">MEL Consultant</span>
-                            <span class="job-date">Jun 2022 – Nov 2022</span>
-                        </div>
-                        <div class="job-company">Winrock International (CLEAN Project - USDA Funded)</div>
-                        <ul class="cv-list">
-                            <li>Supported the MEL Director in implementing the project's comprehensive MEL plan.</li>
-                            <li>Designed data collection forms utilizing KoBoToolbox, configured tablets for server connection, and troubleshot system issues.</li>
-                            <li>Mentored program staff on monitoring responsibilities to ensure the correct and timely collection of data.</li>
-                            <li>Contributed to the design of learning activities, collaborating with technical staff to adapt interventions based on captured M&E data.</li>
-                            <li>Conducted Data Quality Assessments, including field visits and spot checks, to verify accuracy and promote evidence-based programming.</li>
-                        </ul>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="flex justify-between items-baseline">
-                            <span class="job-title">M&E Officer</span>
-                            <span class="job-date">Jan 2018 – Apr 2021</span>
-                        </div>
-                        <div class="job-company">Health Poverty Action (Nutrition Project - EU Funded)</div>
-                        <ul class="cv-list">
-                            <li>Periodically reviewed M&E tools to effectively monitor the progress of project activities.</li>
-                            <li>Trained relevant staff and consortium partners on M&E concepts and the use of data collection forms.</li>
-                            <li>Compiled, verified, and analyzed data from village, district, and provincial levels.</li>
-                            <li>Drafted quarterly, bi-annual, and annual narrative reports detailing implementation progress and key indicators.</li>
-                            <li>Provided training on WHO Anthro software to provincial/district health offices and 40 health center staff for malnutrition assessment in children under 5.</li>
-                            <li>Managed the data collection process for Community Development Facilitators across 6 districts and composed annual case studies for malnourished children.</li>
-                        </ul>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="flex justify-between items-baseline">
-                            <span class="job-title">Database Officer</span>
-                            <span class="job-date">May 2017 – Jan 2018</span>
-                        </div>
-                        <div class="job-company">Save the Children International (LEAP II Project) | Savannakhet</div>
-                        <ul class="cv-list">
-                            <li>Compiled all literacy monitoring data and supported field staff with tablet usage and basic IT troubleshooting.</li>
-                            <li>Entered data into databases regarding literacy skills, classroom observations, reading clubs, and reading festivals.</li>
-                            <li>Maintained and developed Excel databases and web interfaces (KoBoToolbox), assisting the MEAL Manager with statistical analysis and graphics.</li>
-                        </ul>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="flex justify-between items-baseline">
-                            <span class="job-title">M&E Officer</span>
-                            <span class="job-date">Jul 2013 – Jun 2016</span>
-                        </div>
-                        <div class="job-company">Handicap International (Victim Assistant Project) | Savannakhet</div>
-                        <ul class="cv-list">
-                            <li>Designed data collection forms and database templates for multiple projects.</li>
-                            <li>Coordinated with provincial organizations to organize barrier assessments and outreach services for people with visual and physical impairments.</li>
-                            <li>Provided MS Office training to project field staff and government partners (District Labor, Social Welfare, and Health Offices).</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <div class="flex justify-between items-baseline">
-                            <span class="job-title">M&E Officer</span>
-                            <span class="job-date">2011 – 2013</span>
-                        </div>
-                        <div class="job-company">Handicap International (Maternal and Child Health Project) | Savannakhet</div>
-                        <ul class="cv-list">
-                            <li>Coordinated with hospital nurses across 3 districts to track rehabilitation data for children with disabilities and ANC visits for pregnant women.</li>
-                            <li>Organized outreach services for people with disabilities in collaboration with the Provincial Medical Rehabilitation and Eye Hospital.</li>
-                        </ul>
-                    </div>
-
-                    <!-- Compact earlier experience to save space on A4 -->
-                    <div class="mb-4">
-                        <div class="flex justify-between items-baseline">
-                            <span class="job-title">Database Officer / Assistant</span>
-                            <span class="job-date">2008 – 2011</span>
-                        </div>
-                        <div class="job-company">Care International (Langoca Project) & Handicap International (Road Safety Project)</div>
-                        <ul class="cv-list mb-0">
-                            <li>Designed databases and conducted data entry/analysis for project achievements.</li>
-                            <li>Coordinated with traffic police and hospitals to record data on helmet usage and road traffic accident victims across Vientiane and Savannakhet.</li>
-                        </ul>
-                    </div>
-
-                    <!-- References -->
-                    <div class="section-title mt-6">References</div>
-                    <div class="grid grid-cols-2 gap-4 text-[10.5pt]">
-                        <div>
-                            <strong>Mr. Khantee Sihanouvong</strong><br>
-                            Provincial Finance & Admin Manager<br>
-                            JSI Research and Training Institute, SVK<br>
-                            Tel: 020 98511119<br>
-                            Email: teesihanouvong@gmail.com
-                        </div>
-                        <div>
-                            <strong>Mr. Keophouthone Kittiphanh</strong><br>
-                            Provincial Program Manager<br>
-                            JSI Research and Training Institute, SVK<br>
-                            Tel: 020 22200089<br>
-                            Email: keocaritas@gmail.com
-                        </div>
-                        <div class="col-span-2 mt-2">
-                            <strong>Mr. Lathtana Chanthala</strong><br>
-                            Research Advisor, JSI Research and Training Institute, VTE<br>
-                            Tel/WhatsApp: 020 55514177 | Email: lathtana.c@gmail.com
-                        </div>
-                    </div>
-
+                    <!-- ຂໍ້ມູນຈະຖືກສ້າງ ແລະ ຈັດລຽງໂດຍ AI ຢູ່ບ່ອນນີ້ -->
                 </div>
             </div>
         </main>
     </div>
 
     <script>
+        const apiKey = ""; // API Key ຈະຖືກດຶງມາອັດຕະໂນມັດຈາກລະບົບ
+
         // App Logic
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                document.getElementById('file-status').classList.remove('hidden');
-                const processBtn = document.getElementById('btn-process');
+        function checkTextInput() {
+            const text = document.getElementById('raw-text').value.trim();
+            const processBtn = document.getElementById('btn-process');
+            if (text.length > 50) {
                 processBtn.disabled = false;
                 processBtn.classList.remove('disabled:bg-gray-300');
+            } else {
+                processBtn.disabled = true;
+                processBtn.classList.add('disabled:bg-gray-300');
             }
         }
 
-        function processCV() {
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const fileStatus = document.getElementById('file-status');
+            const errorStatus = document.getElementById('error-status');
+            const rawTextArea = document.getElementById('raw-text');
+            
+            fileStatus.classList.add('hidden');
+            errorStatus.classList.add('hidden');
+            
+            if (!file) return;
+
+            try {
+                if (file.name.endsWith('.docx')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
+                    rawTextArea.value = result.value;
+                    fileStatus.innerHTML = `<i class="fas fa-check-circle"></i> ດຶງຂໍ້ມູນຈາກ "${file.name}" ສຳເລັດ!`;
+                    fileStatus.classList.remove('hidden');
+                    checkTextInput();
+                } else if (file.name.endsWith('.txt')) {
+                    const text = await file.text();
+                    rawTextArea.value = text;
+                    fileStatus.innerHTML = `<i class="fas fa-check-circle"></i> ດຶງຂໍ້ມູນຈາກ "${file.name}" ສຳເລັດ!`;
+                    fileStatus.classList.remove('hidden');
+                    checkTextInput();
+                } else {
+                    errorStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ກະລຸນາອັບໂຫຼດໄຟລ໌ DOCX ຫຼື TXT. ສໍາລັບ PDF ໃຫ້ກັອບປີ້ວາງແທນ.`;
+                    errorStatus.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorStatus.innerHTML = `<i class="fas fa-times-circle"></i> ເກີດຂໍ້ຜິດພາດໃນການອ່ານໄຟລ໌.`;
+                errorStatus.classList.remove('hidden');
+                console.error(error);
+            }
+        }
+
+        async function processCV() {
+            const rawText = document.getElementById('raw-text').value.trim();
+            if (!rawText) return;
+
             // Show loading
             document.getElementById('loading-overlay').classList.remove('hidden');
             document.getElementById('initial-message').classList.add('hidden');
+            document.getElementById('cv-document').classList.add('hidden');
             
-            // Simulate processing time (AI improving text and layout)
-            setTimeout(() => {
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                const systemInstruction = `You are an expert CV editor. The user provides raw text from their CV.
+Your task:
+1. Fix English grammar and spelling.
+2. Enhance the tone (use strong Action Verbs for experiences).
+3. Organize logically (Header, Summary, Experience, Education, Skills).
+4. Output the result strictly as HTML elements designed to fit perfectly into the provided CSS structure. Do not invent new CSS classes, use only these:
+   - Name: <div class="cv-name">...</div>
+   - Contact Info: <div class="text-sm mt-2 text-gray-600 text-center mb-6">...</div>
+   - Section Titles: <div class="section-title">...</div>
+   - Job/Degree Title: <span class="job-title">...</span>
+   - Company/School Name: <div class="job-company">...</div>
+   - Date range: <span class="job-date">...</span>
+   - Layout for job header: <div class="flex justify-between items-baseline"><span class="job-title">...</span><span class="job-date">...</span></div>
+   - Lists of duties/skills: <ul class="cv-list"><li>...</li></ul>
+   - Grid layout for details (like personal info): <div class="personal-grid"><div><strong>Label:</strong> Value</div>...</div>
+5. Return ONLY the raw HTML nodes inside the main container. DO NOT wrap in markdown formatting like html blocks. DO NOT include <html>, <body>, or <head>.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: "Here is my raw CV text:\n" + rawText }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] }
+                };
+
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("API call failed");
+
+                const result = await response.json();
+                let htmlContent = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                
+                // Clean up markdown if AI includes it
+                htmlContent = htmlContent.replace(/\`\`\`html/gi, "").replace(/\`\`\`/g, "").trim();
+
+                document.getElementById('cv-content').innerHTML = htmlContent;
+                
                 document.getElementById('loading-overlay').classList.add('hidden');
                 document.getElementById('cv-document').classList.remove('hidden');
                 
                 // Enable export buttons
                 document.getElementById('btn-export-pdf').disabled = false;
                 document.getElementById('btn-export-doc').disabled = false;
-            }, 1500);
+
+            } catch (error) {
+                console.error("AI Error:", error);
+                alert("ຂໍອະໄພ, ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່ AI. ກະລຸນາລອງໃໝ່.");
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('initial-message').classList.remove('hidden');
+            }
         }
 
         function exportPDF() {
