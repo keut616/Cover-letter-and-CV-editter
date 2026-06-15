@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI CV Optimizer Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts: Noto Sans Lao -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Noto Sans Lao', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* A4 Paper Styling for Preview */
+        .a4-paper {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+        
+        @media (max-width: 768px) {
+            .a4-paper {
+                width: 100%;
+                padding: 10mm;
+            }
+        }
+
+        /* CV Specific Styles */
+        .cv-header {
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .cv-name {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2c3e50;
+            text-transform: uppercase;
+        }
+        .section-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 1px solid #bdc3c7;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .job-title {
+            font-weight: bold;
+            font-size: 12pt;
+            color: #2980b9;
+        }
+        .job-company {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .job-date {
+            font-style: italic;
+            color: #7f8c8d;
+            font-size: 10.5pt;
+        }
+        .cv-list {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            font-size: 10.5pt;
+            line-height: 1.5;
+        }
+        .personal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 10.5pt;
+        }
+        .personal-grid strong {
+            color: #34495e;
+        }
+        
+        /* Spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- Navbar -->
+    <header class="bg-slate-800 text-white p-4 shadow-md flex justify-between items-center z-10">
+        <div class="text-xl font-bold flex items-center gap-2">
+            <i class="fas fa-file-signature text-blue-400"></i>
+            <span>CV Optimizer Pro <small class="font-normal text-gray-400 text-sm ml-2">by AI Expert</small></span>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar Controls -->
+        <aside class="w-80 bg-white p-6 shadow-lg flex flex-col z-10 overflow-y-auto">
+            <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">ເຄື່ອງມືຈັດການ CV</h2>
+            
+            <!-- Step 1: Import -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">1. ນໍາເຂົ້າເອກະສານ (Import)</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-500 transition-colors cursor-pointer" onclick="document.getElementById('file-upload').click()">
+                    <div class="space-y-1 text-center">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400"></i>
+                        <div class="flex text-sm text-gray-600 justify-center">
+                            <span class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                                <span>ອັບໂຫຼດໄຟລ໌</span>
+                                <input id="file-upload" name="file-upload" type="file" class="sr-only" accept=".doc,.docx,.pdf" onchange="handleFileUpload(event)">
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500">DOC, DOCX, PDF ທີ່ຮອງຮັບ</p>
+                    </div>
+                </div>
+                <div id="file-status" class="mt-2 text-sm text-green-600 hidden font-medium">
+                    <i class="fas fa-check-circle"></i> ອັບໂຫຼດ "Keut cv.docx" ສຳເລັດແລ້ວ!
+                </div>
+            </div>
+
+            <!-- Step 2: Process -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">2. ປັບປຸງໄວຍະກອນ & ຈັດໜ້າ</label>
+                <button id="btn-process" onclick="processCV()" disabled class="w-full flex justify-center items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                    <i class="fas fa-magic"></i> ປັບປຸງ CV ໃຫ້ເປັນມືອາຊີບ
+                </button>
+            </div>
+
+            <!-- Step 3: Export -->
+            <div class="mb-4 pt-4 border-t border-gray-200">
+                <label class="block text-sm font-medium text-gray-700 mb-2">3. ສົ່ງອອກເອກະສານ (Export)</label>
+                <div class="flex flex-col gap-2">
+                    <button id="btn-export-pdf" onclick="exportPDF()" disabled class="w-full flex justify-center items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                        <i class="fas fa-file-pdf"></i> ສົ່ງອອກເປັນ PDF
+                    </button>
+                    <button id="btn-export-doc" onclick="exportWord()" disabled class="w-full flex justify-center items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                        <i class="fas fa-file-word"></i> ສົ່ງອອກເປັນ DOC (Word)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="mt-auto bg-blue-50 p-4 rounded-lg text-xs text-blue-800 border border-blue-200">
+                <i class="fas fa-info-circle mb-1 block text-sm"></i>
+                ການປັບປຸງນີ້ຈະບໍ່ປ່ຽນແປງປະຫວັດ ຫຼື ຂໍ້ມູນຂອງທ່ານ, ພຽງແຕ່ແກ້ໄຂໄວຍະກອນ, ໃຊ້ຄຳສັບທີ່ເປັນທາງການ (Action words) ແລະ ຈັດລຽງໂຄງສ້າງໃຫ້ສວຍງາມຂຶ້ນ.
+            </div>
+        </aside>
+
+        <!-- Main Workspace (Preview Area) -->
+        <main class="flex-1 overflow-y-auto bg-gray-200 p-8 flex justify-center relative">
+            
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="absolute inset-0 bg-white/80 z-20 hidden flex-col justify-center items-center">
+                <div class="loader mb-4"></div>
+                <p class="text-lg font-medium text-gray-700">ກຳລັງວິເຄາະ ແລະ ປັບປຸງໂຄງສ້າງ CV...</p>
+            </div>
+
+            <!-- Initial State Message -->
+            <div id="initial-message" class="text-center text-gray-500 mt-20">
+                <i class="fas fa-file-alt text-6xl mb-4 text-gray-300"></i>
+                <p class="text-xl">ກະລຸນາອັບໂຫຼດ ແລະ ກົດປຸ່ມປັບປຸງ ເພື່ອເບິ່ງຕົວຢ່າງ CV</p>
+            </div>
+
+            <!-- The CV Document (Hidden initially) -->
+            <div id="cv-document" class="a4-paper hidden">
+                <div id="cv-content">
+                    <!-- CV Header -->
+                    <div class="cv-header text-center">
+                        <div class="cv-name">KEUT SOUMPHONEPACKDY</div>
+                        <div class="text-sm mt-2 text-gray-600">
+                            Thatluang Tai Village, Xaysettha District, Vientiane Capital, Laos<br>
+                            Mobile/WhatsApp: 020 58800221 | Email: keut619@gmail.com
+                        </div>
+                    </div>
+
+                    <!-- Personal Details -->
+                    <div class="section-title">Personal Details</div>
+                    <div class="personal-grid">
+                        <div><strong>Gender:</strong> Male</div>
+                        <div><strong>Marital Status:</strong> Married</div>
+                        <div><strong>Date of Birth:</strong> 29/12/1978</div>
+                        <div><strong>Nationality:</strong> Lao</div>
+                        <div><strong>Place of Birth:</strong> Nongsanokham Village, Sikhottabong District</div>
+                        <div><strong>Ethnicity:</strong> Lowland Lao</div>
+                    </div>
+
+                    <!-- Education / Skills -->
+                    <div class="section-title">Education & Skills</div>
+                    <ul class="cv-list">
+                        <li><strong>2007:</strong> Graduated from Quest College, majoring in Information Technology.</li>
+                        <li><strong>1997:</strong> Graduated from Lao-Soviet Friendship Vocational School, majoring in Mining Survey.</li>
+                        <li><strong>Languages:</strong> Lao (Native Speaker), English (Proficient in speaking, listening, and writing).</li>
+                    </ul>
+
+                    <!-- Work Experience -->
+                    <div class="section-title">Professional Experience</div>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between items-baseline">
+                            <span class="job-title">Provincial M&E Officer</span>
+                            <span class="job-date">Dec 2022 – Present</span>
+                        </div>
+                        <div class="job-company">JSI Research and Training Institute (LMNCH Project - DOS Funded) | Savannakhet</div>
+                        <ul class="cv-list">
+                            <li>Conduct routine data collection across the province, ensuring accurate entry into appropriate project databases.</li>
+                            <li>Implement quality control processes for data accuracy, consistency, and completeness to promote evidence-based management.</li>
+                            <li>Coordinate with the provincial technical team to identify informational needs and provide relevant data analysis.</li>
+                            <li>Analyze provincial-level data and translate findings into clear visualizations for stakeholders.</li>
+                            <li>Collaborate with research and MEL advisors to operationalize quantitative, qualitative, and participatory methodologies for special studies.</li>
+                            <li>Support district health offices and catchment facilities in conducting routine Data Quality Audits.</li>
+                            <li>Facilitate capacity-building opportunities for local partners regarding data collection methods.</li>
+                            <li>Supervise data entry assistants, providing guidance on techniques to ensure reliable data management.</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between items-baseline">
+                            <span class="job-title">MEL Consultant</span>
+                            <span class="job-date">Jun 2022 – Nov 2022</span>
+                        </div>
+                        <div class="job-company">Winrock International (CLEAN Project - USDA Funded)</div>
+                        <ul class="cv-list">
+                            <li>Supported the MEL Director in implementing the project's comprehensive MEL plan.</li>
+                            <li>Designed data collection forms utilizing KoBoToolbox, configured tablets for server connection, and troubleshot system issues.</li>
+                            <li>Mentored program staff on monitoring responsibilities to ensure the correct and timely collection of data.</li>
+                            <li>Contributed to the design of learning activities, collaborating with technical staff to adapt interventions based on captured M&E data.</li>
+                            <li>Conducted Data Quality Assessments, including field visits and spot checks, to verify accuracy and promote evidence-based programming.</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between items-baseline">
+                            <span class="job-title">M&E Officer</span>
+                            <span class="job-date">Jan 2018 – Apr 2021</span>
+                        </div>
+                        <div class="job-company">Health Poverty Action (Nutrition Project - EU Funded)</div>
+                        <ul class="cv-list">
+                            <li>Periodically reviewed M&E tools to effectively monitor the progress of project activities.</li>
+                            <li>Trained relevant staff and consortium partners on M&E concepts and the use of data collection forms.</li>
+                            <li>Compiled, verified, and analyzed data from village, district, and provincial levels.</li>
+                            <li>Drafted quarterly, bi-annual, and annual narrative reports detailing implementation progress and key indicators.</li>
+                            <li>Provided training on WHO Anthro software to provincial/district health offices and 40 health center staff for malnutrition assessment in children under 5.</li>
+                            <li>Managed the data collection process for Community Development Facilitators across 6 districts and composed annual case studies for malnourished children.</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between items-baseline">
+                            <span class="job-title">Database Officer</span>
+                            <span class="job-date">May 2017 – Jan 2018</span>
+                        </div>
+                        <div class="job-company">Save the Children International (LEAP II Project) | Savannakhet</div>
+                        <ul class="cv-list">
+                            <li>Compiled all literacy monitoring data and supported field staff with tablet usage and basic IT troubleshooting.</li>
+                            <li>Entered data into databases regarding literacy skills, classroom observations, reading clubs, and reading festivals.</li>
+                            <li>Maintained and developed Excel databases and web interfaces (KoBoToolbox), assisting the MEAL Manager with statistical analysis and graphics.</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between items-baseline">
+                            <span class="job-title">M&E Officer</span>
+                            <span class="job-date">Jul 2013 – Jun 2016</span>
+                        </div>
+                        <div class="job-company">Handicap International (Victim Assistant Project) | Savannakhet</div>
+                        <ul class="cv-list">
+                            <li>Designed data collection forms and database templates for multiple projects.</li>
+                            <li>Coordinated with provincial organizations to organize barrier assessments and outreach services for people with visual and physical impairments.</li>
+                            <li>Provided MS Office training to project field staff and government partners (District Labor, Social Welfare, and Health Offices).</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between items-baseline">
+                            <span class="job-title">M&E Officer</span>
+                            <span class="job-date">2011 – 2013</span>
+                        </div>
+                        <div class="job-company">Handicap International (Maternal and Child Health Project) | Savannakhet</div>
+                        <ul class="cv-list">
+                            <li>Coordinated with hospital nurses across 3 districts to track rehabilitation data for children with disabilities and ANC visits for pregnant women.</li>
+                            <li>Organized outreach services for people with disabilities in collaboration with the Provincial Medical Rehabilitation and Eye Hospital.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Compact earlier experience to save space on A4 -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-baseline">
+                            <span class="job-title">Database Officer / Assistant</span>
+                            <span class="job-date">2008 – 2011</span>
+                        </div>
+                        <div class="job-company">Care International (Langoca Project) & Handicap International (Road Safety Project)</div>
+                        <ul class="cv-list mb-0">
+                            <li>Designed databases and conducted data entry/analysis for project achievements.</li>
+                            <li>Coordinated with traffic police and hospitals to record data on helmet usage and road traffic accident victims across Vientiane and Savannakhet.</li>
+                        </ul>
+                    </div>
+
+                    <!-- References -->
+                    <div class="section-title mt-6">References</div>
+                    <div class="grid grid-cols-2 gap-4 text-[10.5pt]">
+                        <div>
+                            <strong>Mr. Khantee Sihanouvong</strong><br>
+                            Provincial Finance & Admin Manager<br>
+                            JSI Research and Training Institute, SVK<br>
+                            Tel: 020 98511119<br>
+                            Email: teesihanouvong@gmail.com
+                        </div>
+                        <div>
+                            <strong>Mr. Keophouthone Kittiphanh</strong><br>
+                            Provincial Program Manager<br>
+                            JSI Research and Training Institute, SVK<br>
+                            Tel: 020 22200089<br>
+                            Email: keocaritas@gmail.com
+                        </div>
+                        <div class="col-span-2 mt-2">
+                            <strong>Mr. Lathtana Chanthala</strong><br>
+                            Research Advisor, JSI Research and Training Institute, VTE<br>
+                            Tel/WhatsApp: 020 55514177 | Email: lathtana.c@gmail.com
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // App Logic
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('file-status').classList.remove('hidden');
+                const processBtn = document.getElementById('btn-process');
+                processBtn.disabled = false;
+                processBtn.classList.remove('disabled:bg-gray-300');
+            }
+        }
+
+        function processCV() {
+            // Show loading
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            document.getElementById('initial-message').classList.add('hidden');
+            
+            // Simulate processing time (AI improving text and layout)
+            setTimeout(() => {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('cv-document').classList.remove('hidden');
+                
+                // Enable export buttons
+                document.getElementById('btn-export-pdf').disabled = false;
+                document.getElementById('btn-export-doc').disabled = false;
+            }, 1500);
+        }
+
+        function exportPDF() {
+            const element = document.getElementById('cv-content');
+            const opt = {
+                margin:       10,
+                filename:     'Keut_SOUMPHONEPACKDY_CV_Optimized.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Promise-based generation
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function exportWord() {
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
+                 "xmlns:w='urn:schemas-microsoft-com:office:word' "+
+                 "xmlns='http://www.w3.org/TR/REC-html40'>"+
+                 "<head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title></head><body>";
+            
+            // Getting the styles to keep basic formatting in Word
+            const styles = `
+                <style>
+                    body { font-family: 'Noto Sans Lao', 'Arial', sans-serif; }
+                    .cv-name { font-size: 20pt; font-weight: bold; text-align: center; }
+                    .section-title { font-size: 14pt; font-weight: bold; border-bottom: 1px solid #000; margin-top: 15pt; margin-bottom: 10pt; }
+                    .job-title { font-weight: bold; font-size: 12pt; }
+                    .job-company { font-weight: bold; color: #444; }
+                    .job-date { font-style: italic; font-size: 10pt; }
+                    ul { margin-top: 5pt; margin-bottom: 10pt; }
+                    li { font-size: 10.5pt; margin-bottom: 3pt; }
+                </style>
+            `;
+            
+            const footer = "</body></html>";
+            const sourceHTML = header + styles + document.getElementById('cv-content').innerHTML + footer;
+            
+            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            const fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            fileDownload.download = 'Keut_SOUMPHONEPACKDY_CV_Optimized.doc';
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        }
+    </script>
+</body>
+</html>
